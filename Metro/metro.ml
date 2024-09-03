@@ -345,19 +345,3 @@ let global_ekikan_list = [
 {kiten="営団赤塚"; shuten="営団成増"; keiyu="有楽町線"; kyori=1.5; jikan=2}; 
 {kiten="営団成増"; shuten="和光市"; keiyu="有楽町線"; kyori=2.1; jikan=3}; 
 ] 
-
-(*
-data_def:
-  input: ekimei_t
-  output: string
-purpose:
-  outline: receive ekimei_t and return "{shozoku}, {kanji}(kana)"
-  function: hyoji: ekimei_t -> string
-*)
-
-let hyoji ekimei = match ekimei with
-  {kanji = kj; kana = kn; romaji = r; shozoku = s} -> s ^ ", " ^ kj ^ "(" ^ kn ^ ")"
-
-(*test case for hyoji*)
-let test1 = hyoji {kanji = "茗荷谷"; kana = "みょうがだに"; romaji = "myogadani"; shozoku = "丸ノ内線"}
-          = "丸ノ内線, 茗荷谷(みょうがだに)"
