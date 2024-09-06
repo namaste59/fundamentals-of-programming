@@ -179,7 +179,7 @@ let global_ekimei_list = [
 {kanji="小竹向原"; kana="こたけむかいはら"; romaji="kotakemukaihara"; shozoku="有楽町線"}; 
 {kanji="氷川台"; kana="ひかわだい"; romaji="hikawadai"; shozoku="有楽町線"}; 
 {kanji="平和台"; kana="へいわだい"; romaji="heiwadai"; shozoku="有楽町線"}; 
-{kanji="営団赤塚"; kana="えいだんあかつか"; romaji="eidanakakuka"; shozoku="有楽町線"}; 
+{kanji="営団赤塚"; kana="えいだんあかつか"; romaji="eidanakatsuka"; shozoku="有楽町線"}; 
 {kanji="営団成増"; kana="えいだんなります"; romaji="eidannarimasu"; shozoku="有楽町線"}; 
 {kanji="和光市"; kana="わこうし"; romaji="wakousi"; shozoku="有楽町線"}; 
 ] 
