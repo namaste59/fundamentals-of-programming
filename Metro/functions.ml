@@ -1,3 +1,23 @@
+#use "metro.ml"
+
+let list1 = 
+  [
+    {kanji="代々木上原"; kana="よよぎうえはら"; romaji="yoyogiuehara"; shozoku="千代田線"}; 
+    {kanji="代々木公園"; kana="よよぎこうえん"; romaji="yoyogikouen"; shozoku="千代田線"}; 
+    {kanji="明治神宮前"; kana="めいじじんぐうまえ"; romaji="meijijinguumae"; shozoku="千代田線"};
+    {kanji="明治神宮前"; kana="めいじじんぐうまえ"; romaji="meijijinguumae"; shozoku="千代田線"}
+  ]
+let list2 = []
+
+let list3 =
+  [
+    {kanji="明治神宮前"; kana="めいじじんぐうまえ"; romaji="meijijinguumae"; shozoku="千代田線"};
+    {kanji="代々木上原"; kana="よよぎうえはら"; romaji="yoyogiuehara"; shozoku="千代田線"}; 
+    {kanji="代々木公園"; kana="よよぎこうえん"; romaji="yoyogikouen"; shozoku="千代田線"}; 
+  ]
+
+
+ 
 (*hyoji*)
 (*
 data_def:
@@ -76,3 +96,102 @@ let test3 = kyori_wo_hyoji "pakipaki" "puripuri" = "pakipakiとpuripuriという
 let test4 = kyori_wo_hyoji "myogadani" "puripuri" = "puripuriという駅は存在しません"
 let test5 = kyori_wo_hyoji "pakipaki" "myogadani" = "pakipakiという駅は存在しません"
 *)
+
+(*
+make_eki_list:
+    outline: receive ekimei_t list and return eki_t list made from the received list
+    type: ekimei_t list -> eki_t list
+*)
+
+
+let rec make_eki_list lst = List.map (fun {kanji = k} -> {namae = k; saitan_kyori = infinity; temae_list = []}) lst
+
+let test1 = make_eki_list list1 = 
+  [{namae = "代々木上原"; saitan_kyori = infinity; temae_list = []};
+   {namae = "代々木公園"; saitan_kyori = infinity; temae_list = []};
+   {namae = "明治神宮前"; saitan_kyori = infinity; temae_list = []};
+   {namae = "明治神宮前"; saitan_kyori = infinity; temae_list = []}
+  ]
+let test2 = make_eki_list list2 = []
+
+(*
+shokika:
+  outline: receive eki_t list and string(kiten, kanji), return eki_t list that the first item's saitan_kyori <- 0 and temae_list <- first
+  type: eki_t list -> string -> eki_t list
+*)
+let rec shokika lst kiten = match lst with 
+    [] -> []
+  | {namae = n; saitan_kyori = k; temae_list = t} as first :: rest ->
+      if n = kiten
+        then {namae = n; saitan_kyori = 0.; temae_list = [n]} :: rest
+        else first :: shokika rest kiten
+(*let test1 = shokika (make_eki_list list1) "代々木上原" = 
+  [{namae = "代々木上原"; saitan_kyori = 0.; temae_list = ["代々木上原"]};
+   {namae = "代々木公園"; saitan_kyori = infinity; temae_list = []};
+   {namae = "明治神宮前"; saitan_kyori = infinity; temae_list = []};
+  ]
+*)
+
+(*
+seiretsu:
+  outline: receive ekimei_t list and return the received list sorted by hiragana order and remove duplicate stations
+  type: ekimei_t list -> ekimei_t list
+*)
+
+let rec sort eki eki_lst = match eki_lst with
+  [] -> [eki]
+| {kana = k} as first :: rest -> match eki with {kana = eki_k} ->
+  if eki_k < k
+    then eki :: first :: rest
+  else if eki_k = k
+    then first :: rest
+  else first :: sort eki rest
+
+let rec seiretsu lst = match lst with
+    [] -> []
+  | first :: rest -> sort first (seiretsu rest)
+
+(*let test1 = seiretsu list1 = [
+  {kanji="明治神宮前"; kana="めいじじんぐうまえ"; romaji="meijijinguumae"; shozoku="千代田線"};
+  {kanji="代々木上原"; kana="よよぎうえはら"; romaji="yoyogiuehara"; shozoku="千代田線"}; 
+  {kanji="代々木公園"; kana="よよぎこうえん"; romaji="yoyogikouen"; shozoku="千代田線"}; 
+]*)
+
+(*
+koushin1:
+  outline: receive station(eki_t) p and q, return update q if p & q are related directly or just q
+  type: eki_t -> eki_t -> eki_t
+*)
+
+
+
+(*
+let test1 = 
+  koushin1 {namae = "代々木上原"; saitan_kyori = 1.2; temae_list = ["代々木上原"]} {namae = "代々木公園"; saitan_kyori = 3.; temae_list = []}
+    = {namae = "代々木公園"; saitan_kyori = 2.2; temae_list = ["代々木公園"; "代々木上原"; ]}
+
+let test2 = 
+  koushin1 {namae = "代々木上原"; saitan_kyori = 1.2; temae_list = ["代々木上原"]} {namae = "たまご"; saitan_kyori = 3.; temae_list = []}
+    = {namae = "たまご"; saitan_kyori = 3.; temae_list = []}
+*)
+
+(*
+koushin:
+  outline: receive the previous station(eki_t) and v()
+  type: eki_t -> eki_t list -> eki_t list
+*)
+let koushin p v = 
+  let koushin1 p q = 
+    match p with {namae = n_p; saitan_kyori = s_p; temae_list = t_p} ->
+    match q with {namae = n_q; saitan_kyori = s_q; temae_list = t_q} ->
+      let kyori = get_ekikan_kyori n_p n_q global_ekikan_list in
+        if(kyori < s_q -. s_p)
+          then {namae = n_q; saitan_kyori = s_p +. kyori; temae_list = n_q :: t_p}
+        else q
+    in
+      List.map (koushin1 p) v
+
+let test1 = 
+  koushin {namae = "代々木公園"; saitan_kyori = 0.; temae_list = ["代々木公園"]} [{namae = "代々木上原"; saitan_kyori = infinity; temae_list = []}; {namae="明治神宮前"; saitan_kyori= infinity; temae_list = []}]
+  = [{namae = "代々木上原"; saitan_kyori = 1.0; temae_list = ["代々木上原"; "代々木公園"]}; {namae="明治神宮前"; saitan_kyori= 1.2; temae_list = ["明治神宮前"; "代々木公園"]}]
+

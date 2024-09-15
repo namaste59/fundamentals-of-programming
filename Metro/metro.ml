@@ -12,6 +12,12 @@ type ekikan_t = {
   kyori  : float;  (* 距離 *) 
   jikan  : int;    (* 時間 *) 
 } 
+
+type eki_t = {
+  namae: string; (*駅名, 漢字*)
+  saitan_kyori: float;
+  temae_list: string list;
+}
  
 let global_ekimei_list = [ 
 {kanji="代々木上原"; kana="よよぎうえはら"; romaji="yoyogiuehara"; shozoku="千代田線"}; 
